@@ -2,13 +2,15 @@
 # Project Title: Global Environmental Sustainability Dashboard
 
 Summary:
-The objective of this project is to explore and visualize trends in environmental sustainability globally, focusing on three critical metrics: greenhouse gas emissions, renewable energy consumption, and air quality. The central question we aim to answer is: "How have greenhouse gas emissions, renewable energy consumption, and air quality changed over the past two decades, and how do these metrics vary across different regions and countries?"
+The objective of this project is to explore and visualize trends in environmental sustainability globally, focusing on three critical metrics: greenhouse gas emissions (based on industries), renewable energy consumption, and air quality. The central question we aim to answer is: "How have greenhouse gas emissions, renewable energy consumption, and air quality changed over the past two decades, and how do these metrics vary across different regions and countries?"
 
 This interactive Shiny dashboard will allow users to examine these environmental indicators over time and by region or country, providing insights into the progress toward global sustainability goals and identifying areas where more action may be needed.
 
-We will use three primary datasets to address this question:
+We will use four primary datasets to address this question:
 
 Greenhouse Gas Emissions: Data from the World Bank on total greenhouse gas emissions (in metric tons of CO₂ equivalent) by country, tracking trends over time and across regions. Source
+
+Emissions based on sources / industries: Determine which field contributes to the highest among the emissions by country, trends and time.
 
 Renewable Energy Consumption: World Bank data showing the percentage of each country’s total energy consumption derived from renewable sources. This metric offers a view of how countries are adopting renewable energy over time. Source
 
@@ -21,9 +23,17 @@ Using these datasets, we will create visualizations including time-series plots,
 Greenhouse gas emissions:
 https://data.worldbank.org/indicator/EN.GHG.ALL.MT.CE.AR5
 
+Emissions based on sources / industries:
+https://www.epa.gov/ghgreporting/data-sets (2023 Data Summary Spreadsheets (zip)) (Emissions by Unit and Fuel Type (zip))
+
 Renewable Energy Consumption:
 https://data.worldbank.org/indicator/EG.FEC.RNEW.ZS
 
 Air Quality
 https://www.who.int/data/gho/data/themes/air-pollution/who-air-quality-database
+
+
+
+
+
 
