@@ -1,0 +1,56 @@
+---
+title: "pt2"
+author: "Xuan Nguyen"
+date: "2024-11-12"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+# Load necessary libraries
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+
+
+  
+```
+# Load the data (replace with your file path)
+```{r}
+data <- read.csv("/Users/xuanmn/Desktop/CSS 451/final project/pt2/API_EN.GHG.ALL.MT.CE.AR5_DS2_en_csv_v2_10763.csv", skip = 4)
+```
+
+# Filter for the countries of interest and select the relevant columns
+```{r}
+print(colnames(data)) 
+years <- paste0("X", 2015:2022)  
+countries_of_interest <- c("United States", "China", "Russian Federation", "Brazil", "United Kingdom")
+```
+
+# Filter and select columns
+```{r}
+selected_data <- data %>%
+  filter(Country.Name %in% countries_of_interest) %>%
+  select(Country.Name, all_of(years))
+colnames(selected_data) <- gsub("^X", "", colnames(selected_data))
+```
+# Plotted data
+```{r}
+selected_data_long <- selected_data %>%
+  pivot_longer(cols = -Country.Name, names_to = "Year", values_to = "Emissions") %>%
+  mutate(Year = as.integer(Year)) # Convert Year to integer for proper plotting
+  
+  ggplot(selected_data_long, aes(x = Year, y = Emissions, color = Country.Name)) +
+  geom_line(size = 1) +
+  geom_point() +
+  labs(title = "Greenhouse Gas Emissions (2015-2022)",
+       x = "Year",
+       y = "Emissions (Million metric tons of CO2 equivalent)",
+       color = "Country") +
+  theme_minimal()
+```
+
+

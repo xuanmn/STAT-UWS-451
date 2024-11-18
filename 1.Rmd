@@ -1,0 +1,109 @@
+---
+title: "pt2"
+author: "Xuan Nguyen"
+date: "2024-11-12"
+output: 
+  pdf_document:
+    latex_engine: xelatex
+---
+install.packages("readxl")
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(readxl)
+```
+
+```{r}
+# Load the data
+data <- read_excel("/Users/xuanmn/Desktop/CSS 451/final project/pt2/who_aap_2021_v9_11august2022.xlsx", sheet = "AAP_2022_city_v9")
+
+# Filter data to keep only relevant columns and remove rows with missing years
+data_filtered <- data %>%
+  select(`WHO Region`, `City or Locality`, `Measurement Year`, `PM2.5 (μg/m3)`, `PM10 (μg/m3)`, `NO2 (μg/m3)`, 
+         `PM25 temporal coverage (%)`, `PM10 temporal coverage (%)`, `NO2 temporal coverage (%)`) %>%
+  filter(!is.na(`Measurement Year`))
+
+# Calculate annual averages for each pollutant across all data
+annual_avg <- data_filtered %>%
+  group_by(`Measurement Year`) %>%
+  summarise(across(starts_with("PM"), mean, na.rm = TRUE),
+            `NO2 (μg/m3)` = mean(`NO2 (μg/m3)`, na.rm = TRUE))
+
+# Plot the overall average air quality levels over the years
+ggplot(annual_avg, aes(x = `Measurement Year`)) +
+  geom_line(aes(y = `PM2.5 (μg/m3)`, color = "PM2.5"), size = 1) +
+  geom_line(aes(y = `PM10 (μg/m3)`, color = "PM10"), size = 1) +
+  geom_line(aes(y = `NO2 (μg/m3)`, color = "NO2"), size = 1) +
+  labs(title = "Average Air Quality Pollutant Levels Over the Years",
+       x = "Year",
+       y = "Average Concentration (μg/m3)",
+       color = "Pollutants") +
+  geom_hline(yintercept = 10, linetype = "dashed", color = "blue", size = 0.5, show.legend = FALSE) +
+  geom_hline(yintercept = 20, linetype = "dashed", color = "green", size = 0.5, show.legend = FALSE) +
+  geom_hline(yintercept = 40, linetype = "dashed", color = "red", size = 0.5, show.legend = FALSE) +
+  annotate("text", x = max(annual_avg$`Measurement Year`), y = 10, label = "WHO PM2.5 Threshold", color = "blue", hjust = 1) +
+  annotate("text", x = max(annual_avg$`Measurement Year`), y = 20, label = "WHO PM10 Threshold", color = "green", hjust = 1) +
+  annotate("text", x = max(annual_avg$`Measurement Year`), y = 40, label = "WHO NO2 Threshold", color = "red", hjust = 1) +
+  theme_minimal()
+
+# Regional comparison of pollutant levels over the years
+regional_avg <- data_filtered %>%
+  group_by(`WHO Region`, `Measurement Year`) %>%
+  summarise(across(starts_with("PM"), mean, na.rm = TRUE),
+            `NO2 (μg/m3)` = mean(`NO2 (μg/m3)`, na.rm = TRUE))
+
+ggplot(regional_avg, aes(x = `Measurement Year`)) +
+  geom_line(aes(y = `PM2.5 (μg/m3)`, color = `WHO Region`), size = 1) +
+  facet_wrap(~ `WHO Region`, scales = "free_y") +
+labs(
+  title = "Average Air Quality Pollutant Levels Over the Years",
+  x = "Year",
+  y = "Average Concentration (\\textmu g/m^3)", # Use \\textmu for μ
+  color = "Pollutants"
+)+
+  theme_minimal()
+
+# Temporal coverage visualization to assess data reliability over years
+temporal_coverage <- data_filtered %>%
+  group_by(`Measurement Year`) %>%
+  summarise(`PM2.5 Coverage` = mean(`PM25 temporal coverage (%)`, na.rm = TRUE),
+            `PM10 Coverage` = mean(`PM10 temporal coverage (%)`, na.rm = TRUE),
+            `NO2 Coverage` = mean(`NO2 temporal coverage (%)`, na.rm = TRUE))
+
+ggplot(temporal_coverage, aes(x = `Measurement Year`)) +
+  geom_line(aes(y = `PM2.5 Coverage`, color = "PM2.5 Coverage"), size = 1) +
+  geom_line(aes(y = `PM10 Coverage`, color = "PM10 Coverage"), size = 1) +
+  geom_line(aes(y = `NO2 Coverage`, color = "NO2 Coverage"), size = 1) +
+  labs(title = "Temporal Coverage of Air Quality Measurements Over the Years",
+       x = "Year",
+       y = "Temporal Coverage (%)",
+       color = "Pollutant Coverage") +
+  theme_minimal()
+
+# Correlation analysis between pollutants
+cor_data <- data_filtered %>%
+  select(`PM2.5 (μg/m3)`, `PM10 (μg/m3)`, `NO2 (μg/m3)`) %>%
+  drop_na()
+
+cor_matrix <- cor(cor_data, use = "complete.obs")
+print(cor_matrix)
+
+# Scatter plots for correlation between pollutants
+ggplot(data_filtered, aes(x = `PM2.5 (μg/m3)`, y = `PM10 (μg/m3)`)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", col = "blue") +
+  labs(title = "Correlation between PM2.5 and PM10 Levels",
+       x = "PM2.5 (μg/m3)",
+       y = "PM10 (μg/m3)") +
+  theme_minimal()
+
+ggplot(data_filtered, aes(x = `PM2.5 (μg/m3)`, y = `NO2 (μg/m3)`)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", col = "blue") +
+  labs(title = "Correlation between PM2.5 and NO2 Levels",
+       x = "PM2.5 (μg/m3)",
+       y = "NO2 (μg/m3)") +
+  theme_minimal()
+```
