@@ -12,19 +12,15 @@ ui <- fluidPage(
         selected = "United States",
         multiple = TRUE
       ),
-      selectInput(
-        inputId = "viewType",
-        label = "Select View Type:",
-        choices = c("Line Chart", "Bar Chart"),
-        selected = "Line Chart"
-      )
     ),
     
     mainPanel(
       tabsetPanel(
-        tabPanel("Plot", 
-                 plotOutput("pollutionPlot"), 
-                 plotOutput("renewablePlot")  # Added renewable energy plot
+        tabPanel(
+          "Plots", 
+          plotOutput("pollutionPlot"), 
+          plotOutput("renewablePlot"), 
+          plotOutput("airQualityPlot")  # Added air quality plot
         ),
         tabPanel("Summary", textOutput("summaryText"))
       )
