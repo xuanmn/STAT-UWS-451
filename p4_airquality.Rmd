@@ -1,0 +1,41 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+
+data <- read.csv("aqi.csv")
+colnames(data) <- as.character(data[2, ])
+rownames(data) <- NULL
+data <- data[-2, ]
+```
+
+```{r}
+countries_of_interest <- c("United States of America", "China", "Russian Federation", "Brazil", "United Kingdom of Great Britain and Northern Ireland")
+
+data <- data %>%
+  mutate(FactValueNumeric = as.numeric(FactValueNumeric),
+         Period = as.numeric(Period)) %>%
+  filter(Location %in% countries_of_interest, Dim1 == "Total") %>%
+  select(Location, Period, FactValueNumeric)
+
+ggplot(filtered_data, aes(x = Period, y = FactValueNumeric, color = Location, group = Location)) +
+  geom_line() +  
+  geom_point() +  
+  labs(
+    title = "Total Concentrations of fine particulate matter (PM2.5)",
+    x = "Year",
+    y = "PM2.5 Concentration",
+    color = "Country"
+  ) +
+  theme_minimal()
+```
+
+
+
+
+
+
+
