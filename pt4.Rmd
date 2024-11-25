@@ -1,0 +1,76 @@
+---
+title: "pt4"
+author: "Xuan Nguyen"
+date: "2024-11-25"
+output: pdf_document
+---
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(readr)
+library(dplyr)
+library(tidyr)
+
+# Load the dataset
+file_path <- "/Users/xuanmn/Desktop/API_EG.FEC.RNEW.ZS_DS2_en_csv_v2_223.csv"
+data <- read_csv(file_path, skip = 4)
+
+# Filter for renewable energy consumption data
+renewable_energy_data <- data %>%
+  filter(`Indicator Code` == "EG.FEC.RNEW.ZS")
+
+# Select data from the last two decades (2003-2023)
+years <- as.character(2003:2023)
+renewable_energy_trends <- renewable_energy_data %>%
+  select(`Country Name`, all_of(years)) %>%
+  pivot_longer(cols = all_of(years), names_to = "Year", values_to = "Value") %>%
+  group_by(Year) %>%
+  summarize(Global_Average = mean(Value, na.rm = TRUE))
+
+# Plot the global trend
+ggplot(renewable_energy_trends, aes(x = as.numeric(Year), y = Global_Average)) +
+  geom_line(color = "blue", size = 1) +
+  geom_point(color = "red", size = 2) +
+  labs(
+    title = "Global Renewable Energy Consumption",
+    x = "Year",
+    y = "Renewable Energy Consumption (%)"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(readr)
+library(dplyr)
+library(tidyr)
+
+# Load the dataset
+file_path <- "/Users/xuanmn/Desktop/API_EG.FEC.RNEW.ZS_DS2_en_csv_v2_223.csv"
+data <- read_csv(file_path, skip = 4)
+
+# Filter for renewable energy consumption data and the 5 selected countries
+selected_countries <- c("China", "Russian Federation", "United Kingdom", "United States", "Brazil")
+renewable_energy_data <- data %>%
+  filter(`Indicator Code` == "EG.FEC.RNEW.ZS" & `Country Name` %in% selected_countries)
+
+# Select data from the last two decades (2003-2023)
+years <- as.character(2003:2023)
+renewable_energy_trends <- renewable_energy_data %>%
+  select(`Country Name`, all_of(years)) %>%
+  pivot_longer(cols = all_of(years), names_to = "Year", values_to = "Value") %>%
+  mutate(Year = as.numeric(Year))
+
+# Plot trends for the selected countries
+ggplot(renewable_energy_trends, aes(x = Year, y = Value, color = `Country Name`)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(
+    title = "Renewable Energy Consumption",
+    x = "Year",
+    y = "Renewable Energy Consumption (%)",
+    color = "Country"
+  ) +
+  theme_minimal()
+```
