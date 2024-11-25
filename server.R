@@ -30,6 +30,21 @@ renewable_selected_data <- renewable_data %>%
   pivot_longer(cols = all_of(years_renewable), names_to = "Year", values_to = "Value") %>%
   mutate(Year = as.numeric(Year))
 
+# Load air quality data
+air_quality_data <- read.csv("/Users/jadenjensen/Desktop/UW_Classes/D.Fall2024/Cse451/data/aqi.csv")
+colnames(air_quality_data) <- as.character(air_quality_data[2, ])
+rownames(air_quality_data) <- NULL
+air_quality_data <- air_quality_data[-2, ] %>%
+  mutate(
+    FactValueNumeric = as.numeric(FactValueNumeric),
+    Period = as.numeric(Period),
+    Location = recode(Location,
+                      "United States of America" = "United States",
+                      "United Kingdom of Great Britain and Northern Ireland" = "United Kingdom")
+  ) %>%
+  filter(Location %in% countries_of_interest, Dim1 == "Total") %>%
+  select(Location, Period, FactValueNumeric)
+
 server <- function(input, output) {
   
   # Reactive function for GHG emissions
@@ -38,16 +53,19 @@ server <- function(input, output) {
       filter(Country.Name %in% input$country) %>%
       group_by(Country.Name) %>%
       mutate(TotalEmissions = sum(Emissions, na.rm = TRUE)) %>%
-      arrange(desc(TotalEmissions)) %>%
       ungroup()
   })
   
   # Reactive function for renewable energy data
   filtered_renewable_data <- reactive({
     renewable_selected_data %>%
-      filter(`Country Name` %in% input$country) %>%
-      group_by(`Country Name`) %>%
-      arrange(desc(Value))  # Order by highest consumption
+      filter(`Country Name` %in% input$country)
+  })
+  
+  # Reactive function for air quality data
+  filtered_air_quality_data <- reactive({
+    air_quality_data %>%
+      filter(Location %in% input$country)
   })
   
   # Greenhouse gas emissions plot
@@ -57,9 +75,6 @@ server <- function(input, output) {
     ggplot(data_to_plot, aes(x = Year, y = Emissions, color = Country.Name)) +
       geom_line(linewidth = 1) +
       geom_point(size = 2) +
-      scale_color_manual(values = c("United States" = "blue", "China" = "orange", 
-                                    "Russian Federation" = "red", 
-                                    "Brazil" = "cyan", "United Kingdom" = "purple")) +
       labs(
         title = "Greenhouse Gas Emissions Over Time",
         x = "Year (2002-2022)",
@@ -77,12 +92,9 @@ server <- function(input, output) {
   output$renewablePlot <- renderPlot({
     data_to_plot <- filtered_renewable_data()
     
-    ggplot(data_to_plot, aes(x = Year, y = Value, color = reorder(`Country Name`, -Value))) +
+    ggplot(data_to_plot, aes(x = Year, y = Value, color = `Country Name`)) +
       geom_line(linewidth = 1) +
       geom_point(size = 2) +
-      scale_color_manual(values = c("United States" = "blue", "China" = "orange", 
-                                    "Russian Federation" = "red", 
-                                    "Brazil" = "cyan", "United Kingdom" = "purple")) +
       labs(
         title = "Renewable Energy Consumption Over Time",
         x = "Year (2003-2023)",
@@ -96,27 +108,20 @@ server <- function(input, output) {
       )
   })
   
-  # Bar chart for renewable energy in 2023
-  output$renewableBarChart <- renderPlot({
-    data_2023 <- renewable_selected_data %>%
-      filter(Year == 2023 & `Country Name` %in% input$country) %>%
-      arrange(Value)  # Order from lowest to highest for diagonal labels
+  # Air quality plot
+  output$airQualityPlot <- renderPlot({
+    data_to_plot <- filtered_air_quality_data()
     
-    ggplot(data_2023, aes(x = reorder(`Country Name`, Value), y = Value, fill = `Country Name`)) +
-      geom_bar(stat = "identity") +
-      scale_fill_manual(values = c("United States" = "blue", "China" = "orange", 
-                                   "Russian Federation" = "red", 
-                                   "Brazil" = "cyan", "United Kingdom" = "purple")) +
+    ggplot(data_to_plot, aes(x = Period, y = FactValueNumeric, color = Location, group = Location)) +
+      geom_line(linewidth = 1) +
+      geom_point(size = 2) +
       labs(
-        title = "Renewable Energy Consumption in 2023",
-        x = "Country",
-        y = "Renewable Energy Consumption (%)",
-        fill = "Country"
+        title = "Total Concentrations of Fine Particulate Matter (PM2.5)",
+        x = "Year",
+        y = "PM2.5 Concentration",
+        color = "Country"
       ) +
-      theme_minimal() +
-      theme(
-        axis.text.x = element_text(angle = 45, hjust = 1)  # Diagonal labels
-      )
+      theme_minimal()
   })
   
   output$summaryText <- renderText({
