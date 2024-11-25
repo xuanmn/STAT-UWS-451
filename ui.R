@@ -22,7 +22,10 @@ ui <- fluidPage(
     
     mainPanel(
       tabsetPanel(
-        tabPanel("Plot", plotOutput("pollutionPlot")),
+        tabPanel("Plot", 
+                 plotOutput("pollutionPlot"), 
+                 plotOutput("renewablePlot")  # Added renewable energy plot
+        ),
         tabPanel("Summary", textOutput("summaryText"))
       )
     )
