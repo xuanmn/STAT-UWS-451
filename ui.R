@@ -13,12 +13,6 @@ ui <- fluidPage(
         multiple = TRUE
       ),
       selectInput(
-        inputId = "pollutant",
-        label = "Select a Pollutant:",
-        choices = c("PM2.5", "PM10", "NO2"),
-        selected = "PM2.5"
-      ),
-      selectInput(
         inputId = "viewType",
         label = "Select View Type:",
         choices = c("Line Chart", "Bar Chart"),
